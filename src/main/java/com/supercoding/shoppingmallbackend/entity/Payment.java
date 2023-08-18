@@ -23,7 +23,7 @@ public class Payment extends CommonField {
     private Long paymentId;
 
     @NotNull
-    @Column(name = "order_number", columnDefinition = "char(11) not null unique")
+    @Column(name = "order_number", length = 11, nullable = false)
     private String orderNumber;
 
     @NotNull

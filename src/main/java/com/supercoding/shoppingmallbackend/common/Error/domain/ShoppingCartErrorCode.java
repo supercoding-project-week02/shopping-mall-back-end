@@ -22,6 +22,6 @@ public enum ShoppingCartErrorCode implements ErrorCodeInterface {
 
     @Override
     public ErrorCode getErrorCode() {
-        return null;
+        return new ErrorCode(status, message){};
     }
 }

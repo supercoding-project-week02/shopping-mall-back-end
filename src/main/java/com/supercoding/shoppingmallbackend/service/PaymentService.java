@@ -21,6 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Random;
@@ -39,11 +40,12 @@ public class PaymentService {
     @Transactional
     public CommonResponse<List<PaymentResponse>> processPayment(PaymentRequest paymentRequest) {
         Long profileId = AuthHolder.getUserIdx();
+//        Long profileId = 40L;
         Consumer consumer = consumerRepository.findByProfileId(profileId).orElseThrow(()->new CustomException(ProfileErrorCode.NOT_FOUND));
 
         // 재고가 충분한지 확인
         List<ShoppingCart> shoppingCart =  shoppingCartRepository.findAllByConsumerId(consumer.getId());
-        if (shoppingCart.isEmpty()) throw new CustomException(ShoppingCartErrorCode.EMPTY);
+        if (shoppingCart.isEmpty()) throw new CustomException(PaymentErrorCode.NO_PRODUCT);
         if (shoppingCart.stream().anyMatch(cart->cart.getAmount() > cart.getProduct().getAmount())) throw new CustomException(PaymentErrorCode.OVER_AMOUNT);
 
         // 페이머니가 충분한지 확인
@@ -66,6 +68,7 @@ public class PaymentService {
             cart.setIsDeleted(true);
 
             Payment newData = Payment.from(orderNumber, cart, paymentRequest, paidAt);
+            newData.setIsDeleted(false);
             JpaUtils.managedSave(paymentRepository, newData);
         });
 
@@ -74,7 +77,6 @@ public class PaymentService {
 
         // 결제내역 응답
         List<Payment> payments = paymentRepository.findAllByOrderNumber(orderNumber);
-        if (payments.isEmpty()) throw new CustomException(PaymentErrorCode.NO_CREATED_PAYMENT);
         List<PaymentResponse> paymentResponses = payments.stream()
                 .map(PaymentResponse::from)
                 .collect(Collectors.toList());
@@ -100,6 +102,7 @@ public class PaymentService {
 
     public CommonResponse<List<PurchaseResponse>> getPurchaseHistory() {
         Long profileId = AuthHolder.getUserIdx();
+//        Long profileId = 40L;
         Consumer consumer = consumerRepository.findByProfileId(profileId).orElseThrow(()->new CustomException(ProfileErrorCode.NOT_FOUND));
 
         // 구매내역 조회하기
@@ -113,6 +116,7 @@ public class PaymentService {
 
     public CommonResponse<List<SaleResponse>> getSaleHistory() {
         Long profileId = AuthHolder.getUserIdx();
+//        Long profileId = 40L;
         Seller seller = sellerRepository.findByProfileId(profileId).orElseThrow(()->new CustomException(ProfileErrorCode.NOT_FOUND));
 
         // 판매내역 조회하기
