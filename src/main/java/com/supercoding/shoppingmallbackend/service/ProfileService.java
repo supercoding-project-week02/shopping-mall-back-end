@@ -101,7 +101,7 @@ public class ProfileService {
         sellerRepository.save(seller);
     }
     private void createConsumer(Profile profile) {
-        Consumer consumer = Consumer.builder().id(profile.getId()).build();
+        Consumer consumer = Consumer.builder().profile(profile).build();
         consumer.setCreatedAt(Timestamp.valueOf(LocalDateTime.now()));
         consumer.setIsDeleted(false);
         profile.setRole(ProfileRole.CONSUMER);

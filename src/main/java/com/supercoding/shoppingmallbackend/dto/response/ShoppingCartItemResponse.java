@@ -12,7 +12,7 @@ import lombok.*;
 @ToString
 @ApiModel("쇼핑카트 아이템")
 public class ShoppingCartItemResponse {
-    @ApiModelProperty(required = true, value = "구매자의 id", example = "1")
+    @ApiModelProperty(required = true, value = "장바구니 id", example = "1")
     private Long id;
     @ApiModelProperty(required = true, value = "상품을 담은 구매자")
     private ConsumerResponse consumer;

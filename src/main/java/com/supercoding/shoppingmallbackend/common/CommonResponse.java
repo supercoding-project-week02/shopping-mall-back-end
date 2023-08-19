@@ -7,6 +7,9 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.Builder;
 import lombok.Getter;
 
+import java.util.Collections;
+import java.util.List;
+
 @Getter
 @ApiModel("공통응답 폼")
 public class CommonResponse<T> {
@@ -21,6 +24,8 @@ public class CommonResponse<T> {
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private final T data;
 
+    static List<Object> emptyList = Collections.emptyList();
+
     @Builder
     public CommonResponse(boolean result, Integer status, String message,  T data) {
         this.result = result;
@@ -32,10 +37,11 @@ public class CommonResponse<T> {
         return new CommonResponse<T>(true, 200, message, data);
     }
     public static <T>CommonResponse<T> fail(ErrorCode code) {
-        return new CommonResponse<T>(false, code.getStatus(), code.getMessage(), null);
+        return new CommonResponse<>(false, code.getStatus(), code.getMessage(), (T) emptyList);
     }
     public static <T extends Exception>CommonResponse<T> fail(T e) {
-        return new CommonResponse<T>(false, 500, e.getMessage(), null);
+
+        return new CommonResponse<T>(false, 500, e.getMessage(), (T) emptyList);
     }
 
     public String toStream() {

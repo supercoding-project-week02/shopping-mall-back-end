@@ -41,4 +41,8 @@ public interface ShoppingCartRepository extends JpaRepository<ShoppingCart, Long
             "where c.id=:consumerId and sc.isDeleted=false " +
             "order by sc.createdAt desc")
     Slice<ShoppingCart> findAllByConsumerIdWithPagination(Long consumerId, Pageable pageable);
+
+    @Query("delete from ShoppingCart sc " +
+            "where sc.isDeleted=true")
+    void hardDelete();
 }

@@ -13,6 +13,8 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import java.sql.Timestamp;
 import java.text.ParseException;
+import java.util.ArrayList;
+import java.util.List;
 
 @Getter
 @Setter
@@ -62,6 +64,50 @@ public class Product extends CommonField {
     @Column(name = "amount", nullable = false)
     private Long amount;
 
+    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ProductCategory> productCategories = new ArrayList<>();
+
+    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ProductContentImage> productContentImages = new ArrayList<>();
+
+    public void addProductCategory(Category category) {
+        ProductCategory productCategory = ProductCategory.from(this, category);
+        productCategories.add(productCategory);
+        productCategory.setProduct(this);
+    }
+
+    public void removeProductCategory(Category category) {
+        ProductCategory productCategory = findProductCategoryByCategory(category);
+        if (productCategory != null) {
+            productCategories.remove(productCategory);
+            productCategory.setProduct(null);
+        }
+    }
+
+    private ProductCategory findProductCategoryByCategory(Category category) {
+        return productCategories.stream()
+                .filter(pc -> pc.getCategory().equals(category))
+                .findFirst()
+                .orElse(null);
+    }
+
+    public void addProductContentImage(ProductContentImage image) {
+        productContentImages.add(image);
+        image.setProduct(this);
+    }
+
+    public void removeProductContentImage(ProductContentImage image) {
+        productContentImages.remove(image);
+        image.setProduct(null);
+    }
+
+    public ProductContentImage findProductContentImageByImage(ProductContentImage image) {
+        return productContentImages.stream()
+                .filter(contentImage -> contentImage.equals(image))
+                .findFirst()
+                .orElse(null);
+    }
+
 
     public static Product from(ProductRequestBase productRequestBase, Seller seller, Genre genre) throws ParseException {
         return Product.builder()
@@ -71,6 +117,7 @@ public class Product extends CommonField {
                 .price(productRequestBase.getPrice())
                 .closingAt(DateUtils.convertToTimestamp(productRequestBase.getClosingAt()))
                 .amount(productRequestBase.getAmount())
+                .productCategories(new ArrayList<>())
                 .build();
     }
 
