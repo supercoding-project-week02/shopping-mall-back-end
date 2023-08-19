@@ -1,11 +1,9 @@
 package com.supercoding.shoppingmallbackend.dto.response;
 
 import com.supercoding.shoppingmallbackend.entity.Profile;
-import com.supercoding.shoppingmallbackend.entity.ProfileRole;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
-import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
 
 @Getter

@@ -1,9 +1,11 @@
 package com.supercoding.shoppingmallbackend.service;
 
 import com.supercoding.shoppingmallbackend.common.Error.CustomException;
+import com.supercoding.shoppingmallbackend.common.Error.domain.PaymentErrorCode;
 import com.supercoding.shoppingmallbackend.common.Error.domain.ProfileErrorCode;
 import com.supercoding.shoppingmallbackend.common.Error.domain.UserErrorCode;
 import com.supercoding.shoppingmallbackend.common.Error.domain.UtilErrorCode;
+import com.supercoding.shoppingmallbackend.dto.response.ProfileMoneyResponse;
 import com.supercoding.shoppingmallbackend.security.JwtUtiles;
 import com.supercoding.shoppingmallbackend.dto.ProfileDetail;
 import com.supercoding.shoppingmallbackend.dto.response.LoginResponse;
@@ -21,7 +23,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.awt.color.ProfileDataException;
 import java.io.IOException;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
@@ -74,7 +75,7 @@ public class ProfileService {
                 .phone(phoneNumber)
                 .paymoney(0L)
                 .build();
-        profile.setCreatedAt(Timestamp.valueOf(LocalDateTime.now()));
+        profile.setCreatedAt(Timestamp.valueOf(LocalDateTime.now())); //TODO: 제거 예정
         profile.setIsDeleted(false);
         profileRepository.save(profile);
         return profile;
@@ -94,7 +95,7 @@ public class ProfileService {
     }
 
     private void createSeller(Profile profile) {
-        Seller seller = Seller.builder().profile(profile).build(); //TODO: 커밋 전에 수정
+        Seller seller = Seller.builder().profile(profile).build();
         seller.setCreatedAt(Timestamp.valueOf(LocalDateTime.now()));
         seller.setIsDeleted(false);
         profile.setRole(ProfileRole.SELLER);
@@ -112,7 +113,7 @@ public class ProfileService {
 
     public LoginResponse login(String email, String password) {
         //유저 존재여부 확인
-        Profile profile = profileRepository.findByEmail(email).orElseThrow(() -> new CustomException(UserErrorCode.NOTFOUND_USER.getErrorCode()));
+        Profile profile = getProfile(email);
         //패스워드 확인
         if(!encoder.matches(password, profile.getPassword())) throw new CustomException(UserErrorCode.LOGIN_INPUT_INVALID.getErrorCode());
         //jwt 토큰 생성
@@ -120,8 +121,31 @@ public class ProfileService {
         return LoginResponse.from(profile, token);
     }
 
+    private Profile getProfile(String email) {
+        return profileRepository.findByEmail(email).orElseThrow(() -> new CustomException(UserErrorCode.NOTFOUND_USER.getErrorCode()));
+    }
+
 
     public ProfileDetail loadProfileByProfileIdx(Long idx) {
         return ProfileDetail.from(profileRepository.loadProfileByProfileIdx(idx));
     }
+
+    public ProfileMoneyResponse findProfileLeftMoney(Long profileIdx) {
+        return ProfileMoneyResponse.from(getFindProfile(profileIdx));
+    }
+
+    @Transactional
+    public void rechargeProfileMoney(Long profileIdx, Long rechargeMoney) {
+        Profile findProfile = getFindProfile(profileIdx);
+        Long profileLeftMoney = findProfile.getPaymoney();
+        if(rechargeMoney < 0) {
+            throw new CustomException(PaymentErrorCode.INVALID_RECHARGE_VALUE.getErrorCode());
+        }
+        findProfile.setPaymoney(profileLeftMoney + rechargeMoney);
+    }
+
+    private Profile getFindProfile(Long profileIdx) {
+        return profileRepository.findById(profileIdx).orElseThrow(() -> new CustomException(ProfileErrorCode.NOT_FOUND.getErrorCode()));
+    }
+
 }
