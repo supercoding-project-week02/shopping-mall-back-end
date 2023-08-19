@@ -3,7 +3,7 @@ package com.supercoding.shoppingmallbackend.security;
 public class AuthHolder {
     private static final ThreadLocal<Long> userIdxHolder = new ThreadLocal<>();
 
-    public static void setUserIdx(Long userIdx) {
+    public static void setUserIdx(Long userIdx) { //TODO: porfile로 명칭 변경 예정
         userIdxHolder.set(userIdx);
     }
 
