@@ -1,3 +1,6 @@
+serve:
+  http2:
+    enabled: true
 spring:
   jpa:
     generate-ddl: 'false'
